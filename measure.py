@@ -16,12 +16,14 @@ from optparse import OptionParser
 import signal_env
 from room_response_estimator import *
 
+SR=16000
+
 #######################################################################################################################
 
 def Spectrum(s):
     Ftest = scipy.fftpack.fft( s )
     n = round(s.shape[0]/2)
-    xf = np.linspace(0.0, 44100/2.0, n)
+    xf = np.linspace(0.0, SR/2.0, n)
     return xf, 20*np.log10(np.abs(Ftest[0:n]))
 
 #######################################################################################################################
@@ -46,18 +48,18 @@ if __name__ == "__main__":
     (options, args) = parser.parse_args()
 
 
-    estimator = RoomResponseEstimator(options.duration, options.lowfreq, options.highfreq)
+    estimator = RoomResponseEstimator(options.duration, options.lowfreq, options.highfreq, Fs=SR)
 
     if options.reuse_wav:
         ir_file = options.reuse_wav
     else:
         # Store probe signal in wav file.
-        x = np.append( np.zeros(44100), estimator.probe_pulse * 0.1 )
-        scipy.io.wavfile.write("test_sweep.wav", 44100, x)
+        x = np.append( np.zeros(SR), estimator.probe_pulse * 0.1 )
+        scipy.io.wavfile.write("test_sweep.wav", SR, x)
 
         # Play it and record microphones input simultaneously.
         reccommand = \
-            "rec -q --clobber -r 44100 -b 16 -D -c 2 record_sweep.wav trim 0 10".split(" ")
+            "rec -q --clobber -r 16000 -b 16 -D -c 2 record_sweep.wav trim 0 10".split(" ")
         prec = subprocess.Popen(reccommand)
 
         playcommand = \
@@ -87,6 +89,8 @@ if __name__ == "__main__":
     deconvolved_sweep = fftconvolve(ir, inv_room_response)
 #######################################################################################################################
 
+    import pdb
+    pdb.set_trace()
     plt.subplot(321)
     plt.plot(room_response)
     plt.legend(["Measured Room Response"])

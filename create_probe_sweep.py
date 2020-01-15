@@ -10,6 +10,8 @@ from optparse import OptionParser
 
 from room_response_estimator import *
 
+SR=16000
+
 #######################################################################################################################
 
 def create_probe(RIR_estimator, filename):
@@ -45,5 +47,5 @@ if __name__ == "__main__":
 
     print("Storing probe signale to \"{}\"\nFrequency range [{}-{}], duration {}s".format(\
         options.probe_filename, options.lowfreq, options.highfreq, options.duration))
-    estimator = RoomResponseEstimator(options.duration, options.lowfreq, options.highfreq)
+    estimator = RoomResponseEstimator(options.duration, options.lowfreq, options.highfreq, Fs=SR)
     create_probe(estimator, options.probe_filename)
